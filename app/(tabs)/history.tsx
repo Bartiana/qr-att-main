@@ -3,20 +3,22 @@ import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { COLORS } from '@/constants/colors';
-import { STUDENT_ID } from '@/constants/student';
+import { useAuth } from '@/lib/auth';
 import { getAttendanceHistory, type AttendanceRecord } from '@/lib/database';
 
 export default function HistoryScreen() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const loadHistory = useCallback(() => {
-    getAttendanceHistory(STUDENT_ID).then((rows) => {
+    if (!user) return;
+    const studentId = user?.id ?? 'unknown';
+    getAttendanceHistory(user.id).then((rows) => {
       setRecords(rows);
       setLoading(false);
     });
-  }, []);
-
+  }, [user]);
   useFocusEffect(
     useCallback(() => {
       loadHistory();
